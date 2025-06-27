@@ -4,6 +4,8 @@ import DocumentEditor from './Document';
 import logo from "./logo.png"
 import pdf from "./display.pdf"
 import ChatUI from './Chatbot';
+import axios from 'axios';
+
 // Load PDF.js from CDN
 const loadPDFJS = () => {
   return new Promise((resolve) => {
@@ -54,6 +56,25 @@ const App = () => {
     { title: 'Generate Report', icon: Sparkles, completed: false, description: 'Creating comprehensive insights' },
     { title: 'Edit & Download', icon: Download, completed: false, description: 'Finalize and export your report' },
   ]);
+
+
+const Sendmail= async () => {
+
+  const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post("http://127.0.0.1:5000/send-pdf", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Upload success: " + response.data.message);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      // setStatus("Upload failed: " + (error.response?.data?.error || "Unknown error"));
+    }
+}
 
   // Smooth progress animation
   useEffect(() => {
@@ -193,7 +214,8 @@ const App = () => {
   const generateReport = async () => {
     setIsProcessing(true);
     await simulateStep('Generate Report', 2000);
-    
+    //send mail
+    Sendmail()
     const generatedReport = `
     
 FoxMandal

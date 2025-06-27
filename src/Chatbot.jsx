@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MessageCircle, X, Minimize2 , Sparkles} from 'lucide-react';
 
-const ChatUI = () => {
+const FloatingChatWidget = () => {
   const [message, setMessage] = useState('');
   const [currentReply, setCurrentReply] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false); // ✅ Control animation
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   // Simple bot responses based on keywords
   const getBotResponse = (userMessage) => {
@@ -19,10 +21,9 @@ const ChatUI = () => {
       return "I'm here to assist you! You can ask me about contracts, documents, or any other questions.";
     } else if (msg.includes('thanks')) {
       return "You're welcome! Is there anything else I can help you with?";
-    }else if (msg.includes('what is your name') || msg.includes('your name') || msg.includes('name')) {
+    } else if (msg.includes('what is your name') || msg.includes('your name') || msg.includes('name')) {
       return "My name is FOXI i am here to help to answer you question related to generated Documents";
-    } else if (msg.includes('bye') || msg.includes('goodbye')) {
-    }else if (msg.includes('do you know tamil') || msg.includes('you know tamil') || msg.includes('tamil theriyuma')) {
+    } else if (msg.includes('do you know tamil') || msg.includes('you know tamil') || msg.includes('tamil theriyuma')) {
       return "Konjam theriyum because i am just sample";
     } else if (msg.includes('bye') || msg.includes('goodbye')) {
       return "Goodbye! Feel free to reach out if you need any assistance.";
@@ -31,7 +32,7 @@ const ChatUI = () => {
     }
   };
 
-  // ✅ Typewriter Component
+  // Typewriter Component
   const TypewriterText = ({ text, onComplete }) => {
     const [displayText, setDisplayText] = useState('');
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,12 +45,11 @@ const ChatUI = () => {
         }, 30);
         return () => clearTimeout(timer);
       } else {
-        onComplete && onComplete(); // ✅ Stop animation
+        onComplete && onComplete();
       }
     }, [currentIndex, text, onComplete]);
 
     useEffect(() => {
-      // Reset on new text only when animation is triggered
       setDisplayText('');
       setCurrentIndex(0);
     }, [text]);
@@ -57,101 +57,192 @@ const ChatUI = () => {
     return <span>{displayText}</span>;
   };
 
-  // ✅ Handle sending message and trigger animation
+  // Handle sending message and trigger animation
   const handleSendMessage = () => {
     if (!message.trim()) return;
 
     const currentMessage = message;
+    setMessage(''); // Clear input immediately
     setIsTyping(true);
     setCurrentReply('');
-    setShouldAnimate(false); // Reset animation
+    setShouldAnimate(false);
 
     setTimeout(() => {
       const botResponse = getBotResponse(currentMessage);
       setCurrentReply(botResponse);
       setIsTyping(false);
-      setShouldAnimate(true); // ✅ Trigger animation
+      setShouldAnimate(true);
     }, 1000);
   };
 
-  return (
-    <div className="flex items-center justify-center">
-      <div className="w-full max-w-2xl">
-        {/* Chat Input */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-1">
-          <div className="flex items-start gap-4 ">
-            {/* Message Input Area */}
-            <div className="flex-1 ">
-              <textarea
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="👋 Hi! I'm Foxi. Ask me anything about documents, or general questions."
-                className="w-full text-gray-700 text-lg resize-none border-none outline-none bg-transparent placeholder-gray-400"
-                rows={2}
-                style={{ minHeight: '60px' }}
-              />
-            </div>
-          </div>
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
-          {/* Reply Section */}
-          {(isTyping || currentReply) && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="flex-1">
-                  {isTyping ? (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <span className="text-sm">Foxi is typing</span>
-                      <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div
-                          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.1s' }}
-                        ></div>
-                        <div
-                          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.2s' }}
-                        ></div>
-                      </div>
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+    setIsMinimized(false);
+  };
+
+  const minimizeChat = () => {
+    setIsMinimized(true);
+  };
+
+  const maximizeChat = () => {
+    setIsMinimized(false);
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      {/* Chat Widget */}
+      {isOpen && (
+        <div className={`mb-4 transition-all duration-300 ease-in-out ${
+          isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'
+        }`}>
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 h-full flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-sm">Chat with Foxi</h3>
+                  <p className="text-blue-100 text-xs">AI Document Assistant</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {!isMinimized ? (
+                  <button
+                    onClick={minimizeChat}
+                    className="text-white/80 hover:text-white transition-colors p-1"
+                  >
+                    <Minimize2 className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={maximizeChat}
+                    className="text-white/80 hover:text-white transition-colors text-xs px-2 py-1 bg-white/20 rounded"
+                  >
+                    Expand
+                  </button>
+                )}
+                <button
+                  onClick={toggleChat}
+                  className="text-white/80 hover:text-white transition-colors p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Chat Content - Only show when not minimized */}
+            {!isMinimized && (
+              <>
+                {/* Chat Messages Area */}
+                <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+                  {!currentReply && !isTyping && (
+                    <div className="text-center text-gray-500 text-sm mt-8">
+                      <Sparkles className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>Hi! I'm Foxi, your AI assistant.</p>
+                      <p>Ask me anything about documents!</p>
                     </div>
-                  ) : (
-                    <div className="text-gray-700 text-base">
-                      {shouldAnimate ? (
-                        <>
-                        <TypewriterText
-                          text={currentReply}
-                          onComplete={() => setShouldAnimate(false)}
-                        />
-                        </>
-                      ) : (
-                        <>
-                       
-                        <span>{currentReply}</span>
-                        </>
-                      )}
+                  )}
+
+                  {/* Reply Section */}
+                  {(isTyping || currentReply) && (
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Sparkles className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1 bg-white rounded-lg p-3 shadow-sm">
+                          {isTyping ? (
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <span className="text-sm">Foxi is typing</span>
+                              <div className="flex space-x-1">
+                                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div
+                                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                                  style={{ animationDelay: '0.1s' }}
+                                ></div>
+                                <div
+                                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                                  style={{ animationDelay: '0.2s' }}
+                                ></div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-gray-700 text-sm">
+                              {shouldAnimate ? (
+                                <TypewriterText
+                                  text={currentReply}
+                                  onComplete={() => setShouldAnimate(false)}
+                                />
+                              ) : (
+                                <span>{currentReply}</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* Bottom Controls */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            <div className="flex-1"></div>
-            <button
-              onClick={handleSendMessage}
-              disabled={!message.trim() || isTyping}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
-            >
-              <span>Ask Foxi</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+                {/* Input Area */}
+                <div className="p-4 bg-white border-t border-gray-200">
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1">
+                      <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Type your message..."
+                        className="w-full text-sm resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        rows={1}
+                        style={{ minHeight: '36px', maxHeight: '100px' }}
+                      />
+                    </div>
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!message.trim() || isTyping}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white p-2 rounded-lg transition-colors shadow-sm flex-shrink-0"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
+      )}
 
-       
-      </div>
+      {/* Floating Chat Button */}
+      <button
+        onClick={toggleChat}
+        className={`w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group ${
+          isOpen ? 'scale-90' : 'scale-100 animate-pulse'
+        }`}
+      >
+        {isOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <>
+            <Sparkles className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            {/* Notification dot */}
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-xs text-white font-bold">!</span>
+            </div>
+          </>
+        )}
+      </button>
     </div>
   );
 };
 
-export default ChatUI;
+export default FloatingChatWidget;

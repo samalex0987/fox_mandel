@@ -3,6 +3,7 @@ import { Upload, FileText, CheckCircle, Download, Edit3, Zap, Eye, Sparkles, Che
 import DocumentEditor from './Document';
 import logo from "./logo.png"
 import pdf from "./display.pdf"
+import ChatUI from './Chatbot';
 // Load PDF.js from CDN
 const loadPDFJS = () => {
   return new Promise((resolve) => {
@@ -700,7 +701,8 @@ e-mail: prashantha.kumar@foxmandal.in
         </div>
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Ready to Generate Report</h3>
         <p className="text-gray-600 mb-8">Your document has been analyzed. Generate your comprehensive report now.</p>
-        
+        <ChatUI />
+        <br />
         <button
           onClick={generateReport}
           disabled={isProcessing}

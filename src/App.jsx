@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, CheckCircle, Download, Edit3, Zap, Eye, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Download, Zap, Eye, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import DocumentEditor from './Document';
-import logo from "./logo.png"
-import pdf from "./display.pdf"
+import logo from "./logo.png";
+import pdf from "./display.pdf";
 import ChatUI from './Chatbot';
 import axios from 'axios';
 
@@ -34,10 +34,6 @@ const simulateStep = (stepName, delay = 2000) => {
 };
 
 const App = () => {
-
-
-  
-
   const [currentStep, setCurrentStep] = useState(0);
   const [file, setFile] = useState(null);
   const [report, setReport] = useState(null);
@@ -46,8 +42,6 @@ const App = () => {
   const [pdfPages, setPdfPages] = useState([]);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [uploadedEStamp, setUploadedEStamp] = useState(null);
-  const [isEditingReport, setIsEditingReport] = useState(false);
-  const [editableReport, setEditableReport] = useState('');
   const [currentPageIndex, setCurrentPageIndex] = useState(0); // For carousel navigation
   const [steps, setSteps] = useState([
     { title: 'Upload Document', icon: Upload, completed: false, description: 'Select your document to begin processing' },
@@ -57,10 +51,8 @@ const App = () => {
     { title: 'Edit & Download', icon: Download, completed: false, description: 'Finalize and export your report' },
   ]);
 
-
-const Sendmail= async () => {
-
-  const formData = new FormData();
+  const Sendmail = async () => {
+    const formData = new FormData();
     formData.append("file", file);
 
     try {
@@ -72,9 +64,8 @@ const Sendmail= async () => {
       console.log("Upload success: " + response.data.message);
     } catch (error) {
       console.error("Upload failed:", error);
-      // setStatus("Upload failed: " + (error.response?.data?.error || "Unknown error"));
     }
-}
+  };
 
   // Smooth progress animation
   useEffect(() => {
@@ -105,10 +96,6 @@ const Sendmail= async () => {
   const handleDragOver = (e) => {
     e.preventDefault();
   };
-
-
-
-
 
   const handleDrop = async (e) => {
     e.preventDefault();
@@ -191,6 +178,116 @@ const Sendmail= async () => {
     setCurrentPageIndex(index);
   };
 
+  // Render page indicators with pagination
+  const renderPageIndicators = () => {
+    const maxButtons = 5; // Maximum number of page buttons to show
+    const pageCount = pdfPages.length;
+    const buttons = [];
+
+    // If there are 5 or fewer pages, show all page buttons
+    if (pageCount <= maxButtons) {
+      return pdfPages.map((_, index) => (
+        <button
+          key={index}
+          onClick={() => goToPage(index)}
+          className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
+            currentPageIndex === index
+              ? 'bg-blue-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          {index + 1}
+        </button>
+      ));
+    }
+
+    // Calculate the range of pages to display
+    const sideButtons = Math.floor(maxButtons / 2); // Buttons on each side of current page
+    let startPage = Math.max(0, currentPageIndex - sideButtons);
+    let endPage = Math.min(pageCount - 1, currentPageIndex + sideButtons);
+
+    // Adjust start and end to always show maxButtons pages when possible
+    if (endPage - startPage < maxButtons - 1) {
+      if (startPage === 0) {
+        endPage = Math.min(pageCount - 1, startPage + maxButtons - 1);
+      } 
+      else if (endPage === pageCount - 1) {
+        startPage = Math.max(0, endPage - maxButtons + 1);
+      }
+    }
+
+    // Add first page
+    if (startPage > 0) {
+      buttons.push(
+        <button
+          key={0}
+          onClick={() => goToPage(0)}
+          className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
+            currentPageIndex === 0
+              ? 'bg-blue-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          1
+        </button>
+      );
+    }
+
+    // Add ellipsis after first page if needed
+    if (startPage > 1) {
+      buttons.push(
+        <span key="start-ellipsis" className="text-gray-600 text-xs px-2">
+          ...
+        </span>
+      );
+    }
+
+    // Add page buttons in the calculated range
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          onClick={() => goToPage(i)}
+          className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
+            currentPageIndex === i
+              ? 'bg-blue-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          {i + 1}
+        </button>
+      );
+    }
+
+    // Add ellipsis before last page if needed
+    if (endPage < pageCount - 2) {
+      buttons.push(
+        <span key="end-ellipsis" className="text-gray-600 text-xs px-2">
+          ...
+        </span>
+      );
+    }
+
+    // Add last page
+    if (endPage < pageCount - 1) {
+      buttons.push(
+        <button
+          key={pageCount - 1}
+          onClick={() => goToPage(pageCount - 1)}
+          className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
+            currentPageIndex === pageCount - 1
+              ? 'bg-blue-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          {pageCount}
+        </button>
+      );
+    }
+
+    return buttons;
+  };
+
   // Simulate moving to the next step
   const handleNextStep = async () => {
     if (currentStep < steps.length - 1) {
@@ -214,10 +311,8 @@ const Sendmail= async () => {
   const generateReport = async () => {
     setIsProcessing(true);
     await simulateStep('Generate Report', 2000);
-    //send mail
-    Sendmail()
+    Sendmail();
     const generatedReport = `
-    
 FoxMandal
 Solicitors & Advocates
 To,
@@ -384,7 +479,6 @@ e-mail: prashantha.kumar@foxmandal.in
     `;
 
     setReport(generatedReport);
-    setEditableReport(generatedReport);
 
     const newSteps = [...steps];
     newSteps[3].completed = true;
@@ -392,58 +486,34 @@ e-mail: prashantha.kumar@foxmandal.in
     setIsProcessing(false);
   };
 
-  // Handle report editing
-  const handleEditReport = () => {
-    setIsEditingReport(true);
-  };
-
-  const handleUpdateReport = () => {
-    setReport(editableReport);
-    setIsEditingReport(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditableReport(report);
-    setIsEditingReport(false);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="relative max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
-       <div className="flex items-center mb-8 space-x-4 flex-col md:flex-row md:space-x-4">
-  {/* Logo Container */}
-  <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
-    <img src={logo} alt="Fox Mandal Logo" className="max-w-full max-h-full object-contain" />
-  </div>
-
-  {/* Text Content */}
-  <div className="text-center md:text-left">
-    <h1 className="text-2xl font-bold text-gray-900">Fox Mandal</h1>
-    <p className="text-gray-600 text-sm">Legal Document Processor</p>
-  </div>
-</div>
-<hr />
-<br />
-
+        <div className="flex items-center mb-8 space-x-4 flex-col md:flex-row md:space-x-4">
+          <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+            <img src={logo} alt="Fox Mandal Logo" className="max-w-full max-h-full object-contain" />
+          </div>
+          <div className="text-center md:text-left">
+            <h1 className="text-2xl font-bold text-gray-900">Fox Mandal</h1>
+            <p className="text-gray-600 text-sm">Legal Document Processor</p>
+          </div>
+        </div>
+        <hr />
+        <br />
 
         {/* Progress Steps at Top */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between relative">
-            {/* Progress Line */}
             <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200">
               <div 
                 className="h-full bg-blue-600 transition-all duration-500 ease-out"
                 style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
               ></div>
             </div>
-
-            {/* Step Indicators */}
             {steps.map((step, index) => {
               const isActive = currentStep === index;
               const isCompleted = step.completed;
-              const isPending = index > currentStep;
-
               return (
                 <div key={index} className="flex flex-col items-center relative z-10">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
@@ -529,8 +599,7 @@ e-mail: prashantha.kumar@foxmandal.in
               
               {pdfPages.length > 0 ? (
                 <div className="space-y-6">
-                  {/* Page Navigation Header */}
-                  <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 max-w-full">
                     <div className="flex items-center space-x-4">
                       <button
                         onClick={goToPreviousPage}
@@ -539,11 +608,9 @@ e-mail: prashantha.kumar@foxmandal.in
                       >
                         <ChevronLeft className="w-5 h-5 text-gray-600" />
                       </button>
-                      
                       <div className="text-sm font-medium text-gray-700">
                         Page {currentPageIndex + 1} of {pdfPages.length}
                       </div>
-                      
                       <button
                         onClick={goToNextPage}
                         className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -552,26 +619,11 @@ e-mail: prashantha.kumar@foxmandal.in
                         <ChevronRight className="w-5 h-5 text-gray-600" />
                       </button>
                     </div>
-                    
-                    {/* Page Number Indicators */}
-                    <div className="flex items-center space-x-2">
-                      {pdfPages.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => goToPage(index)}
-                          className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
-                            currentPageIndex === index
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
-                          }`}
-                        >
-                          {index + 1}
-                        </button>
-                      ))}
+                    <div className="flex items-center space-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                      {renderPageIndicators()}
                     </div>
                   </div>
 
-                  {/* Current Page Display */}
                   {pdfPages[currentPageIndex] && (
                     <div className="border border-gray-200 rounded-lg overflow-hidden">
                       <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
@@ -579,7 +631,6 @@ e-mail: prashantha.kumar@foxmandal.in
                       </div>
                       <div className="p-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          {/* PDF Page Image */}
                           <div>
                             <h5 className="font-medium text-gray-700 mb-2">Page Preview</h5>
                             <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
@@ -590,37 +641,32 @@ e-mail: prashantha.kumar@foxmandal.in
                               />
                             </div>
                           </div>
-                          
-                          {/* Extracted Text */}
                           <div>
-                             <DocumentEditor  />
+                            <DocumentEditor />
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Navigation Controls */}
                   <div className="flex items-center justify-between">
                     <button
                       onClick={goToPreviousPage}
-                      className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center space-x-2_px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={pdfPages.length <= 1}
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span>Previous Page</span>
                     </button>
-                    
                     <div className="text-center">
                       <button
                         onClick={handleNextStep}
                         disabled={isProcessing}
-                        className="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
+                        className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+ aki                    >
                         {isProcessing ? 'Processing...' : 'Approve & Continue'}
                       </button>
                     </div>
-                    
                     <button
                       onClick={goToNextPage}
                       className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -647,10 +693,8 @@ e-mail: prashantha.kumar@foxmandal.in
                   <Zap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-800 mb-4">Document Analysis</h3>
-                <p className="text-gray-600 mb-6">Our system has analyzed your uploaded documents and identified some missing documents that may be required for accurate processing.</p>
+                <p className="text-gray-600 mb-6">Our system has analyzed your uploaded documents and identified some missing documents that may be relabelquired for accurate processing.</p>
               </div>
-
-              {/* Missing Documents Section */}
               <div className="mb-8">
                 <div className="bg-orange-100 border-l-4 border-orange-400 rounded-lg p-6">
                   <div className="flex items-start justify-between">
@@ -690,22 +734,11 @@ e-mail: prashantha.kumar@foxmandal.in
                   </div>
                 </div>
               </div>
-
-              {/* Analysis Progress */}
-              {/* <div className="text-center mb-8">
-                <div className="max-w-xs mx-auto mb-6">
-                  <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div className="h-full bg-blue-600 rounded-full animate-pulse w-3/4"></div>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500">Analyzing document content and structure...</p>
-              </div>
-               */}
               <div className="text-center">
                 <button
                   onClick={handleNextStep}
                   disabled={isProcessing}
-                  className="px-8 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? 'Processing...' : 'Continue to Report Generation'}
                 </button>
@@ -715,253 +748,130 @@ e-mail: prashantha.kumar@foxmandal.in
 
           {/* Generate Report */}
           {currentStep === 3 && (
-  <div>
-    {!report ? (
-      <div className="text-center py-16">
-        <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-lg flex items-center justify-center">
-          <Sparkles className="w-8 h-8 text-white" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Ready to Generate Report</h3>
-        <p className="text-gray-600 mb-8">Your document has been analyzed. Generate your comprehensive report now.</p>
-        <ChatUI />
-        <br />
-        <button
-          onClick={generateReport}
-          disabled={isProcessing}
-          className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isProcessing ? 'Generating Report...' : 'Generate Report'}
-        </button>
-      </div>
-    ) : (
-      <div className="py-8">
-        <div className="mb-8">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-2">Generated Report & Document Preview</h3>
-          <p className="text-gray-600">Review your document pages, extracted text content, and the generated report</p>
-        </div>
-
-        {/* PDF Pages Carousel View */}
-        {pdfPages.length > 0 ? (
-          <div className="space-y-6 mb-8">
-            {/* Page Navigation Header */}
-            <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={goToPreviousPage}
-                  className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={pdfPages.length <= 1}
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-                
-                <div className="text-sm font-medium text-gray-700">
-                  Page {currentPageIndex + 1} of {pdfPages.length}
-                </div>
-                
-                <button
-                  onClick={goToNextPage}
-                  className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={pdfPages.length <= 1}
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-              
-              {/* Page Number Indicators */}
-              <div className="flex items-center space-x-2">
-                {pdfPages.map((_, index) => (
+            <div>
+              {!report ? (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Ready to Generate Report</h3>
+                  <p className="text-gray-600 mb-8">Your document has been analyzed. Generate your comprehensive report now.</p>
+                  <ChatUI />
+                  <br />
                   <button
-                    key={index}
-                    onClick={() => goToPage(index)}
-                    className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
-                      currentPageIndex === index
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
-                    }`}
+                    onClick={generateReport}
+                    disabled={isProcessing}
+                    className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {index + 1}
+                    {isProcessing ? 'Generating Report...' : 'Generate Report'}
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Current Page Display */}
-            {pdfPages[currentPageIndex] && (
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                  <h4 className="font-medium text-gray-800">Page {pdfPages[currentPageIndex].pageNumber}</h4>
                 </div>
-                <div className="p-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* PDF Page Image */}
-                    <div>
-                      <h5 className="font-medium text-gray-700 mb-2">Page Preview</h5>
-                      <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                        <img 
-                          src={pdfPages[currentPageIndex].canvas} 
-                          alt={`Page ${pdfPages[currentPageIndex].pageNumber}`}
-                          className="w-full h-auto max-h-96 object-contain"
-                        />
+              ) : (
+                <div className="py-8">
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-semibold text-gray-800 mb-2">Generated Report & Document Preview</h3>
+                    <p className="text-gray-600">Review your document pages, extracted text content, and the generated report</p>
+                  </div>
+                  {pdfPages.length > 0 ? (
+                    <div className="space-y-6 mb-8">
+                      <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 max-w-full">
+                        <div className="flex items-center space-x-4">
+                          <button
+                            onClick={goToPreviousPage}
+                            className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={pdfPages.length <= 1}
+                          >
+                            <ChevronLeft className="w-5 h-5 text-gray-600" />
+                          </button>
+                          <div className="text-sm font-medium text-gray-700">
+                            Page {currentPageIndex + 1} of {pdfPages.length}
+                          </div>
+                          <button
+                            onClick={goToNextPage}
+                            className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={pdfPages.length <= 1}
+                          >
+                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                          </button>
+                        </div>
+                        <div className="flex items-center space-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                          {renderPageIndicators()}
+                        </div>
+                      </div>
+                      {pdfPages[currentPageIndex] && (
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                            <h4 className="font-medium text-gray-800">Page {pdfPages[currentPageIndex].pageNumber}</h4>
+                          </div>
+                          <div className="p-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              <div>
+                                <h5 className="font-medium text-gray-700 mb-2">Page Preview</h5>
+                                <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                                  <img 
+                                    src={pdfPages[currentPageIndex].canvas} 
+                                    alt={`Page ${pdfPages[currentPageIndex].pageNumber}`}
+                                    className="w-full h-auto max-h-96 object-contain"
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <h5 className="font-medium text-gray-700 mb-2">OCR Extracted Text</h5>
+                                <div className="border border-gray-200 rounded-lg bg-white p-4 max-h-96 overflow-y-auto">
+                                  <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
+                                    {pdfPages[currentPageIndex].text || 'No text extracted from this page'}
+                                  </pre>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={goToPreviousPage}
+                          className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={pdfPages.length <= 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span>Previous Page</span>
+                        </button>
+                        <button
+                          onClick={goToNextPage}
+                          className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={pdfPages.length <= 1}
+                        >
+                          <span>Next Page</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    
-                    {/* OCR Extracted Text */}
-                    <div>
-                      <h5 className="font-medium text-gray-700 mb-2">OCR Extracted Text</h5>
-                      <div className="border border-gray-200 rounded-lg bg-white p-4 max-h-96 overflow-y-auto">
-                        <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
-                          {pdfPages[currentPageIndex].text || 'No text extracted from this page'}
-                        </pre>
-                      </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No PDF pages to display</p>
                     </div>
+                  )}
+                  <div className="mt-8 text-center">
+                    <button
+                      onClick={handleNextStep}
+                      disabled={isProcessing}
+                      className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isProcessing ? 'Processing...' : 'Continue to Final Step'}
+                    </button>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Navigation Controls */}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={goToPreviousPage}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={pdfPages.length <= 1}
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Previous Page</span>
-              </button>
-              
-              {/* <div className="text-center">
-                <button
-                  onClick={handleNextStep}
-                  disabled={isProcessing}
-                  className="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isProcessing ? 'Processing...' : 'Approve & Continue'}
-                </button>
-              </div> */}
-              
-              <button
-                onClick={goToNextPage}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={pdfPages.length <= 1}
-              >
-                <span>Next Page</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              )}
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No PDF pages to display</p>
-          </div>
-        )}
+          )}
 
-        {/* Report Section */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            {/* <h3 className="text-2xl font-semibold text-gray-800">Generated Report Summary</h3>
-            <p className="text-gray-600 mt-1">Review and edit your document analysis report</p> */}
-          </div>
-          <div className="flex space-x-3">
-            {/* {!isEditingReport ? (
-              <button
-                onClick={handleEditReport}
-                className="px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2"
-              >
-                <Edit3 className="w-4 h-4" />
-                <span>Edit</span>
-              </button>
-            ) : (
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleUpdateReport}
-                  className="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={handleCancelEdit}
-                  className="px-4 py-2 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            )} */}
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-          {/* <div className="bg-white px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <FileText className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-800">Document Analysis Report</h4>
-                <p className="text-sm text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
-              </div>
-            </div>
-          </div> */}
-          
-          {/* <div className="p-6">
-            {isEditingReport ? (
-              <div>
-                <textarea
-                  value={editableReport}
-                  onChange={(e) => setEditableReport(e.target.value)}
-                  className="w-full h-96 p-4 border border-gray-300 rounded-lg font-mono text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                  placeholder="Edit your report content here..."
-                />
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg p-4 border border-gray-200">
-                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
-                  {report}
-                </pre>
-              </div>
-            )}
-          </div> */}
-        </div>
-        
-        <div className="mt-8 text-center">
-          <button
-            onClick={handleNextStep}
-            disabled={isProcessing}
-            className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isProcessing ? 'Processing...' : 'Continue to Final Step'}
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-)}
           {/* Edit and Download Report */}
           {currentStep === 4 && (
             <div className="py-8">
               {report ? (
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Your Report is Ready!</h3>
-                  {/* <div className="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-200">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800 mb-2">Document Analysis Report</h4>
-                        <pre className="text-sm text-gray-600 whitespace-pre-wrap">{report}</pre>
-                      </div>
-                    </div>
-                  </div> */}
-                  
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    {/* <button
-                      onClick={() => alert('Opening report editor...')}
-                      className="px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      <span>Edit Report</span>
-                    </button> */}
                     <a
                       href={pdf}
                       download

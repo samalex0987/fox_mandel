@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, CheckCircle, Download, Zap, Eye, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
-import axios from 'axios';
+import { Upload, FileText, CheckCircle, Download, Edit3, Zap, Eye, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import DocumentEditor from './Document';
+import logo from "./logo.png";
 import pdf from "./display.pdf";
-import output from "./output.pdf"
-import logo from "./logo.png"
+import ChatUI from './Chatbot';
+import axios from 'axios';
 import FloatingChatWidget from './Chatbot';
-
-// Mock components (replace with actual implementations if available)
-const DocumentEditor = () => (
-  <div className="border border-gray-200 rounded-lg bg-white p-4">
-    Document Editor Placeholder
-  </div>
-);
-const ChatUI = () => (
-  <div className="border border-gray-200 rounded-lg bg-white p-4">
-    Chat UI Placeholder
-  </div>
-);
 
 // Load PDF.js from CDN
 const loadPDFJS = () => {
@@ -45,7 +34,7 @@ const simulateStep = (stepName, delay = 2000) => {
   });
 };
 
-const Simulation = () => {
+const App = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [file, setFile] = useState(null);
   const [report, setReport] = useState(null);
@@ -55,6 +44,8 @@ const Simulation = () => {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedEStamp, setUploadedEStamp] = useState(null);
+  const [isEditingReport, setIsEditingReport] = useState(false);
+  const [editableReport, setEditableReport] = useState('');
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageGroup, setPageGroup] = useState(0);
   const pagesPerGroup = 5;
@@ -66,41 +57,6 @@ const Simulation = () => {
     { title: 'Generate Report', icon: Sparkles, completed: false, description: 'Creating comprehensive insights' },
     { title: 'Edit & Download', icon: Download, completed: false, description: 'Finalize and export your report' },
   ]);
-
-  // Simulate automatic file upload for demo using local PDF
-  useEffect(() => {
-    if (currentStep === 0) {
-      const simulateFileUpload = async () => {
-        setPdfLoading(true);
-        setUploadProgress(0);
-        const mockFile = new File([""], "display.pdf", { type: "application/pdf" });
-        setFile(mockFile);
-        await processPDF(pdf);
-        setTimeout(() => {
-          handleNextStep();
-        }, 2000);
-      };
-      simulateFileUpload();
-    }
-  }, []);
-
-  // Automatic step progression
-  useEffect(() => {
-    let timer;
-    if (currentStep > 0 && currentStep < steps.length - 1) {
-      timer = setTimeout(async () => {
-        if (currentStep === 2) {
-          const mockEStamp = new File([""], "estamp.pdf", { type: "application/pdf" });
-          setUploadedEStamp(mockEStamp);
-          await simulateStep('E-Stamp Upload', 1000);
-        } else if (currentStep === 3 && !report) {
-          await generateReport();
-        }
-        handleNextStep();
-      }, 3000);
-    }
-    return () => clearTimeout(timer);
-  }, [currentStep, report]);
 
   // Smooth progress animation for steps
   useEffect(() => {
@@ -117,27 +73,20 @@ const Simulation = () => {
     return () => clearInterval(interval);
   }, [currentStep, steps.length]);
 
-  // Process PDF (local or uploaded) with progress tracking
-  const processPDF = async (pdfSource) => {
+  // Process PDF to extract pages and text with progress tracking
+  const processPDF = async (file) => {
     setPdfLoading(true);
     setUploadProgress(0);
     try {
       const pdfjsLib = await loadPDFJS();
-      let pdfDoc;
-
-      if (typeof pdfSource === 'string') {
-        pdfDoc = await pdfjsLib.getDocument(pdfSource).promise;
-      } else {
-        const arrayBuffer = await pdfSource.arrayBuffer();
-        pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
-      }
-
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
       const pages = [];
       const totalPages = pdfDoc.numPages;
 
-      for (let i = 1; i <= totalPages; i++) {
-        const page = await pdfDoc.getPage(i);
-        const viewport = page.getViewport({ scale: 1.0 });
+      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 });
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -155,13 +104,13 @@ const Simulation = () => {
         const text = textContent.items.map(item => item.str).join(' ');
 
         pages.push({
-          pageNumber: i,
+          pageNumber: pageNum,
           canvas: canvasDataUrl,
-          text: text || 'No text extracted from this page',
+          text: text.trim() || 'No text found on this page',
         });
 
         // Update progress based on pages processed
-        const progressPercentage = Math.round((i / totalPages) * 100);
+        const progressPercentage = Math.round((pageNum / totalPages) * 100);
         setUploadProgress(progressPercentage);
       }
 
@@ -170,16 +119,12 @@ const Simulation = () => {
       setPageGroup(0);
     } catch (error) {
       console.error('Error processing PDF:', error);
-      setUploadProgress(0); // Reset progress on error
+      alert('Error processing PDF file');
+      setUploadProgress(0);
     } finally {
       setPdfLoading(false);
-      setUploadProgress(100); // Ensure progress is 100% when complete
+      setUploadProgress(100);
     }
-  };
-
-  const Sendmail = async () => {
-    await simulateStep('Send Email', 1000);
-    console.log("Simulated email sent");
   };
 
   const handleFileUpload = async (event) => {
@@ -248,6 +193,22 @@ const Simulation = () => {
 
   const goToNextPageGroup = () => {
     setPageGroup(prev => Math.min(prev + 1, Math.floor((pdfPages.length - 1) / pagesPerGroup)));
+  };
+
+  const Sendmail = async () => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post("http://127.0.0.1:5000/send-pdf", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Upload success: " + response.data.message);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
   };
 
   const handleNextStep = async () => {
@@ -323,57 +284,93 @@ III. DEVOLUTION OF TITLE
 |--------|------------|--------------|---------------------|--------------------------|--------------------------|---------|
 | 1. | 46/1 | 10 | 11 | 00 | 00 | Mr. Chandrashekar s/o. Shivaji Halalli |
 
-IV. OBSERVATIONS
+Upon perusal of the documents furnished to us,
 
-Based on the documents reviewed, the following observations are noted:
-1. The Record of Tenancy and Crops (RTC) from 1987-88 to 2024-25 consistently shows the land under Survey No. 46/1, measuring 10 acres 11 guntas, with no discrepancies in the extent of the land.
-2. The Mutation Register Extracts (120/2003-04, H140/2014-15, H9/2016-17, T272/2017-18, H92/2017-18, T140/2024-25) confirm the chain of title transfers and ownership changes, culminating in Mr. Chandrashekar s/o. Shivaji Halalli as the current owner.
-3. The Gift Deed dated 10.03.2015 and Partition Deed dated 19.01.2018, both registered at the Sub-Registrar’s office in Gadag, establish the legal transfer of the property to Mr. Chandrashekar.
-4. The Mortgage Deed dated 07.12.2017 indicates an encumbrance that was cleared as per the Encumbrance Certificates covering the period up to 01.01.2025.
-5. The Encumbrance Certificates (01.04.1985 to 01.01.2025) show no pending encumbrances or claims against the property as of the latest date.
-6. The Notarized Genealogical Tree dated 10.09.2024 and 02.01.2025 confirms the family members associated with the property, which is relevant for future transactions.
+1. It is learnt from the Record of Tenancy and Crops for the period 1987-88 to 2003-04, issued by the office of Tahsildar, Gadag taluk, that the name of Mr. Shivaji s/o. Ramappa Halalli is recorded as owner in possession of land bearing Survey No. 46, measuring an extent of 20 acres 22 guntas.
+2. It is observed from the Mutation Register Extract bearing No. 120/2003-04, issued by the office of Tahsildar, Gadag taluk, that Mr. Shivaji s/o. Ramappa Halalli has availed loan amount of Rs. 50,000 and mortgaged the land bearing Survey No. 46 measuring 20 acres 22 guntas in favour of Vyavasaya Seva Sahakari Bank, Harlapura.
+   Note: Discharge of mortgage created vide MR No. 120/2003-04 in favour of Vyavasaya Seva Sahakari Bank, Harlapura.
+3. It is learnt from the Record of Tenancy and Crops for the period 2004-05 to 2015-16, issued by the office of Tahsildar, Gadag taluk, that the name of Mr. Shivaji s/o. Ramappa Halalli is recorded as owner in possession of land bearing Survey No. 46, measuring an extent of 20 acres 22 guntas.
+4. It is observed from the Gift Deed dated 10.03.2015 that Mr. Shivaji, son of Ramappa Halalli, being the absolute owner of the land, and acting out of natural love and affection, gifted the land bearing Survey No. 46, measuring a total of 20 acres 22 guntas, jointly in favor of his two sons namely., (i). Mr. Yallappa and (ii). Mr. Chandrashekar, and the said deed was registered as document No. GDG-110167/2014-15 of book-1, stored in CD No. GDGD320, at the office of Sub-Registrar, Gadag. And the same is recorded in Mutation Register Extract bearing No. H140/201415 , issued by the office of Tahsildar, Gadag taluk.
+5. It is observed from the Mutation Register Extract bearing No. H9/2016-17, issued by the office of Tahsildar, Gadag taluk, that the name of Mr. Shivaji s/o. Ramappa Halalli was removed and the names of (i). Mr. Yallappa and (ii). Mr. Chandrashekar sons of Shivaji Halalli was mutated as joint owners with respect to land bearing Survey No. 46, measuring an extent of 20 acres 22 guntas.
+6. It is learnt from the Record of Tenancy and Crops for the period 2016-17, issued by the office of Tahsildar, Gadag taluk, that the names of (i). Mr. Yallappa and (ii). Mr. Chandrashekar sons of Shivaji Halalli are recorded as joint owners in possession of land bearing Survey No. 46, measuring an extent of 20 acres 22 guntas.
+7. It is observed from the Mortgage Deed dated 07.12.2017, that Mr. Chandrashekar and Mr. Yallappa sons of Shivaji Halalli have availed loan amount of Rs. 40,000 and mortgaged the land bearing Survey No. 46, measuring an extent of 20 acres 22 guntas in favour of Primary Agricultural Pathina Sahakari Sangha and the said deed was registered on 06.01.2018 as document No. GDG-1 Part-V-00110/2017-18, stored in CD No. GDGD371, at the office of Sub-Registrar, Gadag. And the same is recorded in Mutation Register Extract bearing No. T272/2017-18, issued by the office of Tahsildar, Gadag taluk.
+   Note: Discharge of mortgage created vide mortgage deed registered on 06.01.2018 as document No. GDG-1 Part-V-00110/2017-18, to be provided.
+8. It is observed from the 11 E Sketch bearing No. 08031016922504001, issued by the office of Tahsildar, Gadag taluk, that provides that the land bearing Survey No. 46 totally measuring to an extent of 20 acres 22 guntas, is divided into two blocks, (i). The land measuring 10 acres 11 guntas belongs to Mr. Chandrashekar s/o. Shivaji Halalli in the 1st Block and (ii). The land measuring to an extent of 10 acres 11 guntas belongs to Mr. Yallappa s/o. Shivaji Halalli in the 2nd Block.
+9. It is observed from the Partition Deed dated 19.01.2018, registered as document No. GDG-1-09812/2017-18 of book-1, stored in CD No. GDGD371, at the office of Sub-Registrar, Gadag., that (i). Mr. Chandrashekar and (ii). Mr. Yallappa sons of Shivaji Halalli being the joint owners entered into partition and partitioned the land bearing Survey No. 46 measuring an extent of 20 acres 22 guntas. As per the terms herein (i). Mr. Chandrashekar s/o. Shivaji Halalli was allotted with land measuring an extent of 10 acres 11 guntas out of 20 acres 22 guntas in Survey No. 46 and (ii). Mr. Yallappa s/o. Shivaji Halalli was allotted with land measuring an extent of 10 acres 11 guntas out of 20 acres 22 guntas in Survey No. 46. And the same is recorded in Mutation Register Extract bearing No. H92/2017-18, issued by the office of Tahsildar, Gadag taluk.
+10. It is learnt from the Record of Tenancy and Crops for the period 2017-18 to 2024-25, issued by the office of Tahsildar, Gadag taluk, that the names of the owners recorded as follows:
+    (i). Mr. Chandrashekar s/o. Shivaji Halalli is recorded as owner in possession of land measuring an extent of 10 acres 11 guntas out of 20 acres 22 guntas in Survey No. 46.
+    (ii). Mr. Yallappa s/o. Shivaji Halalli is recorded as owner in possession of land measuring an extent of 10 acres 11 guntas out of 20 acres 22 guntas in Survey No. 46.
+11. It is observed from the Mutation Register Extract bearing No. T140/2024-25, issued by the office of Tahsildar, Gadag taluk, that the land bearing Survey No. 46, totally measuring an extent of 20 acres 22 guntas has been phodied/bifurcated and renumbered as detailed below:
+    (i). The land measuring an extent of 10 acres 11 guntas out of 20 acres 22 guntas in Survey No. 46 was renumbered and assigned with New Survey No. 46/1 and which was mutated in the name of Mr. Chandrashekar s/o. Shivaji Halalli.
+    (ii). The land measuring an extent of 10 acres 11 guntas out of 20 acres 22 guntas in Survey No. 46 was renumbered and assigned with New Survey No. 46/2 and which was mutated in the name of Mr. Yallappa s/o. Shivaji Halalli.
+12. It is learnt from the Latest Record of Tenancy and Crops for the period 2024-25, issued by the office of Tahsildar, Gadag taluk, that the name of Mr. Chandrashekar s/o. Shivaji Halalli is recorded as owner in possession of land bearing Survey No. 46/1 measuring an extent of 10 acres 11 guntas.
+13. The Karnataka Revision Settlement Akarband, issued by the office of Department of Survey & Land Records, provides the total extent measuring 20 acres 22 guntas with no kharab in land bearing mother Survey No. 46.
+14. Tippani/PT Sheet issued by the office of the Department of Land Records, confirms the topographical shape of mother Survey number 46.
+15. Village Map of Harlapura village, issued by Director of Land Records reflects the existence of Land bearing Survey No. 46.
+    Note: Latest Property Tax paid receipt to be provided.
 
-V. LEGAL SCRUTINY
+IV. ENCUMBRANCE CERTIFICATE
 
-The documents have been scrutinized for authenticity and legal validity:
-- All registered deeds (Gift Deed, Mortgage Deed, Partition Deed) are duly stamped and registered as per the Karnataka Stamp Act and Registration Act.
-- The RTCs and Mutation Extracts are issued by the competent authority (Tahsildar, Gadag taluk) and align with the revenue records.
-- The 11 E Sketch and Karnataka Revision Settlement Akarband confirm the physical boundaries and measurements of the land.
-- No legal disputes or claims are evident from the Encumbrance Certificates or other documents provided.
+1. Encumbrance Certificate for the period from 01.04.1985 to 31.03.2004, issued by the office of Sub-Registrar, Gadag, with regard to Survey No. 46 measuring to an extent of 20 acres 22 guntas, does not reflect any transactions.
+2. Encumbrance Certificate for the period from 01.04.2004 to 12.08.2024, issued by the office of Sub-Registrar, Gadag, with regard to Survey No. 46 measuring to an extent of 20 acres 22 guntas, reflects the entries as follows:
 
-VI. DUE DILIGENCE
+| SI. No. | Transactions | Document No | Remark |
+|---------|--------------|-------------|--------|
+| 1. | Partition Deed | Dated 19.01.2018 document No. GDG-1-09812/2017-18 | Nil |
+| 2. | Mortgage Deed | Dated 07.12.2017 document No. GDG-1 Part-V-00110/2017-18 | Nil |
+| 3. | Gift Deed | Dated 10.03.2015 document No. GDG-1-10167/2014-15 | Nil |
 
-Independent searches conducted by Mr. B.P. Gubber Advocate corroborate the findings from the provided documents. No adverse claims, liens, or litigations were found against the property as of 01.01.2025.
+3. Encumbrance Certificate for the period from 01.04.2024 to 01.01.2025, issued by the office of Sub-Registrar, Gadag, with regard to Survey No. 46/1 measuring to an extent of 10 acres 11 guntas, does not reflect any transactions.
+4. Mortgage/s reflected in Mutation Register's:
+   (i). MR. No. 120/2003-04 reflects the mortgage in favour of Vyavasaya Seva Sahakari Bank, Harlapura.
+   (ii). MR. No. T272/2017-18 reflects the mortgage in favour of Primary Agricultural Pathina Sahakari Sangha.
 
-VII. SCHEDULE OF PROPERTY
+V. OTHER OBSERVATIONS
 
-- **Survey No.**: 46/1
-- **Extent**: 10 acres 11 guntas
-- **Location**: Harlapura village, Betageri hobli, Gadag taluk, Gadag district
-- **Boundaries**:
-  - East: Survey No. 46/2
-  - West: Survey No. 45
-  - North: Village Road
-  - South: Survey No. 47
+(i)
+ALL THAT PIECE AND PARCEL of the Agricultural land bearing Survey No. 46/1 measuring 10 acres 11 guntas, situated at Harlapura village, Gadag taluk, Betageri hobli, Gadag district and bound on:
 
-VIII. RECOMMENDATIONS
+East by: Survey No. 47
+West by: Survey No. 43
+North by: Survey No. 45
+South by: Survey No. 46/2.
+[Boundaries are ascertained from the Tippani, PT sheet/Ghat plot]
 
-Based on the scrutiny and due diligence:
-1. The title of Mr. Chandrashekar s/o. Shivaji Halalli to the property is clear, valid, and marketable.
-2. For any future transactions (e.g., sale, lease, or mortgage), the following family members should be included as signatories to avoid potential disputes:
-   - Mrs. Neelamma w/o. Chandrashekar Halalli
-   - Mrs. Kaveri w/o. Manjappa Honalli
-   - Mrs. Bheemavva w/o. Gavisiddappa Arera
-   - Ms. Lakshmavva d/o. Chandrashekar Halalli
-   - Ms. Yallamma d/o. Chandrashekar Halalli
-   - Master Venkappa alias Yankappa (minor, represented by Mr. Chandrashekar Halalli)
-3. It is advisable to obtain a fresh Encumbrance Certificate prior to any transaction to confirm no new encumbrances have arisen.
+(ii) RESTRICTIONS ON TRANSFERABILITY
+a. Land Ceiling: The Measurement of Schedule Property falls within the prescribed limit provided under Section 63 of Karnataka Land Reforms Act.
+b. Minor's interest: NO
+c. Grant/Inam Lands: NO
+
+(iii) ENDORSEMENTS:
+Note: PTCL, Nil Tenancy and Nil Acquisition endorsement issued by the concerned authority.
+
+(iv) FAMILY TREE OF THE CURRENT LANDOWNERS
+
+1. It is learnt from the Notarized Genealogical Tree dated 10.09.2024, 02.01.2025, declared by Mr. Chandrashekar s/o. Shivaji Halalli.
+Husband: Mr. Chandrashekar alias Chandrashekarappa s/o. Shivaji Halalli (50 years)
+Wife: Mrs. Neelamma (45 years)
+
+| 1. | Mrs. Kaveri w/o. Manjappa Honalli (27 years) |
+| 2. | Mrs. Bheemavva w/o. Gavisiddappa Arera (24 years) |
+| 3. | Ms. Lakshmavva d/o. Chandrashekar Halalli (23 years) unmarried |
+| 4. | Ms. Yallamma d/o. Chandrashekar Halalli (19 years) unmarried |
+| 5. | Master. Venkappa alias Yankappa s/o. Chandrashekar Halalli (15 years) |
+
+VI. INDEPENDENT VERIFICATIONS
+(i) Sub-Registrar Search's: The Sub-Registrar Search Report, issued by Mr. B.P.Gubber Advocate and the same is attached to this report as an annexure.
+(ii) Revenue Records Search: The Revenue Search Report, issued by Mr. B.P.Gubber Advocate and the same is attached to this report as an annexure.
+
+VII. LITIGATION SEARCH RESULTS
+(i) The Litigation Search Report, issued by Mr. B.P.Gubber Advocate and the same is attached to this report as an annexure.
+(ii) The PACL Land scam Search Report, issued by Mr. B.P.Gubber Advocate and the same is attached to this report as an annexure.
+
+VIII. SPECIAL CATEGORY LANDS
+Upon perusal of documents scrutinized above, it is found that the schedule property DOES NOT come under the purview of SC/ST/Minors/Inam/Grant lands or any land under Special Categories.
 
 IX. OPINION AND RECOMMENDATION
+Upon review and scrutiny of the documents furnished to us and based on independent searches by Mr.B.P. Gubber Advocate, we are of the opinion that, Mr. Chandrashekar s/o. Shivaji Halalli is the absolute owner having valid, clear and marketable title, with respect to land bearing Survey No. 46/1 measuring to an extent of 10 acres 22 guntas, situated at Harlapura village, Gadag taluk, betageri hobli, Gadag district.
 
-Upon review and scrutiny of the documents furnished to us and based on independent searches by Mr. B.P. Gubber Advocate, we are of the opinion that Mr. Chandrashekar s/o. Shivaji Halalli is the absolute owner having valid, clear, and marketable title with respect to land bearing Survey No. 46/1, measuring to an extent of 10 acres 11 guntas, situated at Harlapura village, Gadag taluk, Betageri hobli, Gadag district.
-
-Following persons are to be joined as signatories in the future Deed/s:
+Following person are to be joined as signatories in the future Deed/s:
 
 | SI. No. | Owner/s or Khatedars or Co-owners | SI.No | Family Members |
 |---------|-----------------------------------|-------|----------------|
@@ -382,10 +379,9 @@ Following persons are to be joined as signatories in the future Deed/s:
 | | | 3 | Mrs. Bheemavva w/o. Gavisiddappa Arera |
 | | | 4 | Ms. Lakshmavva d/o. Chandrashekar Halalli |
 | | | 5 | Ms. Yallamma d/o. Chandrashekar Halalli |
-| | | 6 | Master Venkappa alias Yankappa (15 years) M/g father Mr. Chandrashekar Halalli |
+| | | 6 | Master. Venkappa alias Yankappa (15 years) M/g father Mr. Chandrashekar Halalli |
 
 X. CONTACT DETAILS
-
 If any clarification in relation to this Report is required, please contact:
 Prashantha Kumar S. T
 Senior Partner
@@ -398,11 +394,27 @@ Mobile: +919880162142
 e-mail: prashantha.kumar@foxmandal.in
     `;
     setReport(generatedReport);
+    setEditableReport(generatedReport);
+    const newSteps = [...steps];
+    newSteps[3].completed = true;
+    setSteps(newSteps);
     setIsProcessing(false);
   };
 
-  
-  
+  const handleEditReport = () => {
+    setIsEditingReport(true);
+  };
+
+  const handleUpdateReport = () => {
+    setReport(editableReport);
+    setIsEditingReport(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditableReport(report);
+    setIsEditingReport(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <FloatingChatWidget />
@@ -420,7 +432,7 @@ e-mail: prashantha.kumar@foxmandal.in
         <hr />
         <br />
 
-        {/* Progress Steps */}
+        {/* Progress Steps at Top */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between relative">
             <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200">
@@ -452,11 +464,12 @@ e-mail: prashantha.kumar@foxmandal.in
 
         {/* Main Content */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          {/* File Upload Step */}
           {currentStep === 0 && (
             <div className="text-center">
               <div 
                 className={`border-2 border-dashed rounded-lg p-16 transition-all duration-300 ${
-                  file ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50'
+                  file ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50'
                 }`}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -475,8 +488,11 @@ e-mail: prashantha.kumar@foxmandal.in
                     } transition-all duration-300`}>
                       {file && !pdfLoading ? <CheckCircle className="w-8 h-8 text-white" /> : <Upload className="w-8 h-8 text-white" />}
                     </div>
+                    <button className="px-6 py-3 bg-gray-700 text-white rounded-lg font-medium mb-4 hover:bg-gray-800 transition-colors">
+                      Select PDF File
+                    </button>
                     <p className="text-gray-600 text-sm">
-                      {file ? `Selected: ${file.name} (${pdfPages.length} pages)` : 'Demo: Simulating PDF upload...'}
+                      {file ? `Selected: ${file.name} (${pdfPages.length} pages)` : 'or drag and drop your PDF file here'}
                     </p>
                     {pdfLoading && (
                       <div className="mt-4 w-64 mx-auto">
@@ -492,14 +508,26 @@ e-mail: prashantha.kumar@foxmandal.in
                   </div>
                 </label>
               </div>
+              {file && !pdfLoading && pdfPages.length > 0 && (
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={handleNextStep}
+                    disabled={isProcessing}
+                    className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing ? 'Processing...' : 'Start Quality Check'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
+          {/* Quality Check - Carousel View */}
           {currentStep === 1 && (
             <div>
               <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">Quality Check</h3>
-                <p className="text-gray-600">Reviewing document pages and extracted text content from display.pdf</p>
+                <p className="text-gray-600">Review your document pages and extracted text content</p>
               </div>
               {pdfPages.length > 0 ? (
                 <div className="space-y-6">
@@ -574,17 +602,40 @@ e-mail: prashantha.kumar@foxmandal.in
                             </div>
                           </div>
                           <div>
-                            <h5 className="font-medium text-gray-700 mb-2">OCR Extracted Text</h5>
-                            <div className="border border-gray-200 rounded-lg bg-white p-4 max-h-96 overflow-y-auto">
-                              <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
-                                {pdfPages[currentPageIndex].text || 'No text extracted from this page'}
-                              </pre>
-                            </div>
+                            <h5 className="font-medium text-gray-700 mb-2">Document Editor</h5>
+                            <DocumentEditor />
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={goToPreviousPage}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={pdfPages.length <= 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Previous Page</span>
+                    </button>
+                    <div className="text-center">
+                      <button
+                        onClick={handleNextStep}
+                        disabled={isProcessing}
+                        className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isProcessing ? 'Processing...' : 'Approve & Continue'}
+                      </button>
+                    </div>
+                    <button
+                      onClick={goToNextPage}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={pdfPages.length <= 1}
+                    >
+                      <span>Next Page</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -594,6 +645,7 @@ e-mail: prashantha.kumar@foxmandal.in
             </div>
           )}
 
+          {/* Document Analysis */}
           {currentStep === 2 && (
             <div className="py-8">
               <div className="text-center mb-8">
@@ -601,7 +653,7 @@ e-mail: prashantha.kumar@foxmandal.in
                   <Zap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-800 mb-4">Document Analysis</h3>
-                <p className="text-gray-600 mb-6">Simulating document analysis and E-Stamp upload (Demo).</p>
+                <p className="text-gray-600 mb-6">Our system has analyzed your uploaded documents and identified some missing documents that may be required for accurate processing.</p>
               </div>
               <div className="mb-8">
                 <div className="bg-orange-100 border-l-4 border-orange-400 rounded-lg p-6">
@@ -614,15 +666,47 @@ e-mail: prashantha.kumar@foxmandal.in
                         </span>
                       </div>
                       <p className="text-orange-700 text-sm mb-2">
-                        {uploadedEStamp ? `Uploaded: ${uploadedEStamp.name}` : 'Simulating E-Stamp upload...'}
+                        {uploadedEStamp ? `Uploaded: ${uploadedEStamp.name}` : 'Document missing'}
                       </p>
+                    </div>
+                    <div className="ml-4">
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        className="hidden"
+                        id="estamp-upload"
+                        onChange={handleEStampUpload}
+                      />
+                      <label htmlFor="estamp-upload">
+                        <button 
+                          type="button"
+                          className={`px-4 py-2 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                            uploadedEStamp 
+                              ? 'bg-green-600 hover:bg-green-700' 
+                              : 'bg-gray-800 hover:bg-gray-900'
+                          }`}
+                          onClick={() => document.getElementById('estamp-upload').click()}
+                        >
+                          {uploadedEStamp ? 'Uploaded ✓' : 'Upload'}
+                        </button>
+                      </label>
                     </div>
                   </div>
                 </div>
               </div>
+              <div className="text-center">
+                <button
+                  onClick={handleNextStep}
+                  disabled={isProcessing}
+                  className="px-8 py-3 bg-blue-800 text-white font-medium rounded-lg hover:bg-blue-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? 'Processing...' : 'Continue to Report Generation'}
+                </button>
+              </div>
             </div>
           )}
 
+          {/* Generate Report */}
           {currentStep === 3 && (
             <div>
               {!report ? (
@@ -630,120 +714,60 @@ e-mail: prashantha.kumar@foxmandal.in
                   <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-lg flex items-center justify-center">
                     <Sparkles className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Generating Report</h3>
-                  <p className="text-gray-600 mb-8">Simulating report generation (Demo).</p>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Ready to Generate Report</h3>
+                  <p className="text-gray-600 mb-8">Your document has been analyzed. Generate your comprehensive report now.</p>
+                  <ChatUI />
+                  <br />
+                  <button
+                    onClick={generateReport}
+                    disabled={isProcessing}
+                    className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing ? 'Generating Report...' : 'Generate Report'}
+                  </button>
                 </div>
               ) : (
                 <div className="py-8">
                   <div className="mb-8">
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-2">Generated Report & Document Preview</h3>
-                    <p className="text-gray-600">Reviewing document pages and generated report (Demo)</p>
+                    {/* <h3 className="text-2xl font-semibold text-gray-800 mb-2">Document Generated Successfully</h3>
+                    <p className="text-gray-600">Review your document pages, extracted text content, and the generated report</p> */}
                   </div>
                   {pdfPages.length > 0 ? (
-                    <div className="space-y-6 mb-8">
-                      <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-                        <div className="flex items-center space-x-4">
-                          <button
-                            onClick={goToPreviousPage}
-                            className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={pdfPages.length <= 1}
-                          >
-                            <ChevronLeft className="w-5 h-5 text-gray-600" />
-                          </button>
-                          <div className="text-sm font-medium text-gray-700">
-                            Page {currentPageIndex + 1} of {pdfPages.length}
-                          </div>
-                          <button
-                            onClick={goToNextPage}
-                            className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={pdfPages.length <= 1}
-                          >
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
-                          </button>
-                        </div>
-                        <div className="flex items-center space-x-2 overflow-x-auto">
-                          <button
-                            onClick={goToPreviousPageGroup}
-                            className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={pageGroup === 0}
-                          >
-                            <ChevronLeft className="w-5 h-5 text-gray-600" />
-                          </button>
-                          {pdfPages.slice(pageGroup * pagesPerGroup, (pageGroup + 1) * pagesPerGroup).map((_, index) => {
-                            const globalIndex = pageGroup * pagesPerGroup + index;
-                            return (
-                              <button
-                                key={globalIndex}
-                                onClick={() => goToPage(globalIndex)}
-                                className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
-                                  currentPageIndex === globalIndex
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
-                                }`}
-                              >
-                                {globalIndex + 1}
-                              </button>
-                            );
-                          })}
-                          <button
-                            onClick={goToNextPageGroup}
-                            className="p-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={pageGroup >= Math.floor((pdfPages.length - 1) / pagesPerGroup)}
-                          >
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
-                          </button>
-                        </div>
-                      </div>
-                      {pdfPages[currentPageIndex] && (
-                        <div className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                            <h4 className="font-medium text-gray-800">Page {pdfPages[currentPageIndex].pageNumber}</h4>
-                          </div>
-                          <div className="p-4">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                              <div>
-                                <h5 className="font-medium text-gray-700 mb-2">Page Preview</h5>
-                                <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                                  <img 
-                                    src={pdfPages[currentPageIndex].canvas} 
-                                    alt={`Page ${pdfPages[currentPageIndex].pageNumber}`}
-                                    className="w-full h-auto max-h-96 object-contain"
-                                  />
-                                </div>
-                              </div>
-                              <div>
-                                <h5 className="font-medium text-gray-700 mb-2">OCR Extracted Text</h5>
-                                <div className="border border-gray-200 rounded-lg bg-white p-4 max-h-96 overflow-y-auto">
-                                  <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
-                                    {pdfPages[currentPageIndex].text || 'No text extracted from this page'}
-                                  </pre>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <>
+                    
+                    </>
                   ) : (
                     <div className="text-center py-8">
                       <p className="text-gray-500">No PDF pages to display</p>
                     </div>
                   )}
+                  <div className="mt-8 text-center">
+                    <button
+                      onClick={handleNextStep}
+                      disabled={isProcessing}
+                      className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isProcessing ? 'Processing...' : 'Generate Document'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           )}
 
+          {/* Edit and Download Report */}
           {currentStep === 4 && (
             <div className="py-8">
               {report ? (
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Your Report is Ready!</h3>
+                 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    
                     <a
                       href={pdf}
-                      onClick={() => alert('Downloading report... (Demo)')}
                       download
+                      onClick={() => alert('Downloading report...')}
                       className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                     >
                       <Download className="w-4 h-4" />
@@ -769,4 +793,4 @@ e-mail: prashantha.kumar@foxmandal.in
   );
 };
 
-export default Simulation;
+export default App;

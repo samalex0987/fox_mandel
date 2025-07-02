@@ -493,62 +493,68 @@ Report On Title
                             <div className="border border-gray-200 rounded-lg bg-white p-4 max-h-96 overflow-y-auto">
                               <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
                                 {`
-                                Under your instructions, we have undertaken scrutiny of various title deeds, title documents and other revenue documents in respect of the property more fully described in the Schedule below and drawn a Title Report. Please find below the Title Report issued based on the copies of the documents furnished to us by the Client.
 
-I. DESCRIPTION OF THE LANDS
 
-Survey No. 46/1, measuring to an extent of 10 acres 11 guntas, situated at Harlapura village, Betageri hobli, Gadag taluk, and Gadag district.
 
-II. LIST OF THE DOCUMENT REVIEWED
+                          "1. Survey Number": "46",
+                          "10. Mode of Acquisition or Possession": null,
+                          "11. Other Rights and Liabilities": {
+                          "Liabilities": null,
+                          "Rights": null
 
-| Serial No. | Description of Documents |
-|------------|------------------------|
-| 1. | Record of Tenancy and Crops for the period 1987-88 to 2003-04, issued by the office of Tahsildar, Gadag taluk |
-| 2. | Mutation Register Extract bearing No. 120/2003-04, issued by the office of Tahsildar, Gadag taluk |
-| 3. | Record of Tenancy and Crops for the period 2004-05 to 2015-16, issued by the office of Tahsildar, Gadag taluk |
-| 4. | Gift Deed dated 10.03.2015 registered as document No. GDG-1-10167/2014-15 of book-1, stored in CD No. GDGD320, at the office of Sub-Registrar, Gadag |
-| 5. | Mutation Register Extract bearing No. H140/2014-15, issued by the office of Tahsildar, Gadag taluk |
-| 6. | Mutation Register Extract bearing No. H9/2016-17, issued by the office of Tahsildar, Gadag taluk |
-| 7. | Record of Tenancy and Crops for the period 2016-17, issued by the office of Tahsildar, Gadag taluk |
-| 8. | Mortgage Deed dated 07.12.2017 registered on 06.01.2018 as document No. GDG-1 Part-V-00110/2017-18, stored in CD No. GDGD371, at the office of Sub-Registrar, Gadag |
-| 9. | Mutation Register Extract bearing No. T272/2017-18, issued by the office of Tahsildar, Gadag taluk |
-| 10. | 11 E Sketch bearing No. 08031016922504001, issued by the office of Tahsildar, Gadag taluk |
-| 11. | Partition Deed dated 19.01.2018, registered as document No. GDG-1-09812/2017-18 of book-1, stored in CD No. GDGD371, at the office of Sub-Registrar, Gadag |
-| 12. | Mutation Register Extract bearing No. H92/2017-18, issued by the office of Tahsildar, Gadag taluk |
-| 13. | Record of Tenancy and Crops for the period 2017-18 to 2024-25, issued by the office of Tahsildar, Gadag taluk |
-| 14. | Mutation Register Extract bearing No. T140/2024-25, issued by the office of Tahsildar, Gadag taluk |
-| 15. | Latest Record of Tenancy and Crops for the period 2024-25, issued by the office of Tahsildar, Gadag taluk |
-| 16. | Karnataka Revision Settlement Akarband, issued by the office of Department of Survey & Land Records |
-| 17. | Tippani/PT Sheet issued by the office of the Department of Land Records |
-| 18. | Village Map of Harlapura village, issued by Director of Land Records |
-| 19. | Encumbrance Certificate for the period from 01.04.1985 to 31.03.2004, issued by the office of Sub-Registrar, Gadag |
-| 20. | Encumbrance Certificate for the period from 01.04.2004 to 12.08.2024, issued by the office of Sub-Registrar, Gadag |
-| 21. | Encumbrance Certificate for the period from 01.04.2024 to 01.01.2025, issued by the office of Sub-Registrar, Gadag |
-| 22. | Notarized Genealogical Tree dated 10.09.2024, 02.01.2025, declared by Mr. Chandrashekar s/o. Shivaji Halalli |
+                          "12. Cultivation": {
+                          "1. Year and Season": "8989 6005 1805 0001\n8889",
+                          "10. Crop Yield": null,
+                          "11. Cooperative Society": null,
+                          "12. Loan": null,
+                          "13. Description": null,
+                          "2. Farmer's Name and Address": "2\n\n\n\n\n1",
+                          "3. Method of Cultivation": "20-22",
+                          "4. Crop Name and Description": "2\n\n\n\n\n\n\n\n\n20-21",
+                          "5. Irrigated Area": "\n\n\n\n20-21",
+                          "6. Crop Product and Price": null,
+                          "7. Government Dues": null,
+                          "8. Other Dues": null,
+                          "9. Levy": null
 
-III. DEVOLUTION OF TITLE
+                          "Remaining": "8-32",
+                          "Total Area": "8-32",
+                          "Foot Khata (A)": "20-22",
+                          "Foot Khata (B)": null
 
-| SL No. | SURVEY No. | EXTENT Acres | EXTENT Guntas/Cents | EXTENT OF KHARAB LAND A | EXTENT OF KHARAB LAND B | OWNER/S |
-|--------|------------|--------------|---------------------|--------------------------|--------------------------|---------|
-| 1. | 46/1 | 10 | 11 | 00 | 00 | Mr. Chandrashekar s/o. Shivaji Halalli |
+                          "(A) Land Revenue": "Rs. Pai.\n23-2",
+                          "(B) Cess": null,
+                          "(C) Water Rate": null,
+                          "(D) Jodi": null,
+                          "Total": "23-2"
 
-IV. OBSERVATIONS
+                          "5. Soil Sample": "0500",
+                          "6. Patta": "Bangiyu Babba",
+                          "7. Number of Trees": {
+                          "Number": null,
+                          "Name": null
 
-Based on the documents reviewed, the following observations are noted:
-1. The Record of Tenancy and Crops (RTC) from 1987-88 to 2024-25 consistently shows the land under Survey No. 46/1, measuring 10 acres 11 guntas, with no discrepancies in the extent of the land.
-2. The Mutation Register Extracts (120/2003-04, H140/2014-15, H9/2016-17, T272/2017-18, H92/2017-18, T140/2024-25) confirm the chain of title transfers and ownership changes, culminating in Mr. Chandrashekar s/o. Shivaji Halalli as the current owner.
-3. The Gift Deed dated 10.03.2015 and Partition Deed dated 19.01.2018, both registered at the Sub-Registrar’s office in Gadag, establish the legal transfer of the property to Mr. Chandrashekar.
-4. The Mortgage Deed dated 07.12.2017 indicates an encumbrance that was cleared as per the Encumbrance Certificates covering the period up to 01.01.2025.
-5. The Encumbrance Certificates (01.04.1985 to 01.01.2025) show no pending encumbrances or claims against the property as of the latest date.
-6. The Notarized Genealogical Tree dated 10.09.2024 and 02.01.2025 confirms the family members associated with the property, which is relevant for future transactions.
+                          "8. Irrigated Area as per Khatawar": {
+                          "Total": null,
+                          "Source of Irrigation": null,
+                          "Bagayat": null,
+                          "Mungaru": null,
+                          "Hingaru": null
 
-V. LEGAL SCRUTINY
+                          "9. Name of Occupant or Owner, Account Number, Father's Name and Address": {
+                          "name 1": "Mangal\nArea - null, Account Number - null",
+                          "name 2": null,
+                          "name 3": null
 
-The documents have been scrutinized for authenticity and legal validity:
-- All registered deeds (Gift Deed, Mortgage Deed, Partition Deed) are duly stamped and registered as per the Karnataka Stamp Act and Registration Act.
-- The RTCs and Mutation Extracts are issued by the competent authority (Tahsildar, Gadag taluk) and align with the revenue records.
-- The 11 E Sketch and Karnataka Revision Settlement Akarband confirm the physical boundaries and measurements of the land.
-- No legal disputes or claims are evident from the Encumbrance Certificates or other documents provided.
+                          "RTC Unique Number": null,
+                          "RTC Digitally Signed By": null,
+                          "Valid From": null,
+                          "Village Account Form No.": "Village Account Form No.",
+                          "Village": null,
+                          "Taluk": "Muvattokulu",
+                          "Page Serial Number": null,
+                          "Hobli": null
+
 
                                 `}
                               </pre>
@@ -699,62 +705,66 @@ The documents have been scrutinized for authenticity and legal validity:
                                 <div className="border border-gray-200 rounded-lg bg-white p-4 max-h-96 overflow-y-auto">
                                   <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
                                     {`
-                                                                    Under your instructions, we have undertaken scrutiny of various title deeds, title documents and other revenue documents in respect of the property more fully described in the Schedule below and drawn a Title Report. Please find below the Title Report issued based on the copies of the documents furnished to us by the Client.
 
-I. DESCRIPTION OF THE LANDS
+                                    "1. Survey Number": "46",
+                          "10. Mode of Acquisition or Possession": null,
+                          "11. Other Rights and Liabilities": {
+                          "Liabilities": null,
+                          "Rights": null
 
-Survey No. 46/1, measuring to an extent of 10 acres 11 guntas, situated at Harlapura village, Betageri hobli, Gadag taluk, and Gadag district.
+                          "12. Cultivation": {
+                          "1. Year and Season": "8989 6005 1805 0001\n8889",
+                          "10. Crop Yield": null,
+                          "11. Cooperative Society": null,
+                          "12. Loan": null,
+                          "13. Description": null,
+                          "2. Farmer's Name and Address": "2\n\n\n\n\n1",
+                          "3. Method of Cultivation": "20-22",
+                          "4. Crop Name and Description": "2\n\n\n\n\n\n\n\n\n20-21",
+                          "5. Irrigated Area": "\n\n\n\n20-21",
+                          "6. Crop Product and Price": null,
+                          "7. Government Dues": null,
+                          "8. Other Dues": null,
+                          "9. Levy": null
 
-II. LIST OF THE DOCUMENT REVIEWED
+                          "Remaining": "8-32",
+                          "Total Area": "8-32",
+                          "Foot Khata (A)": "20-22",
+                          "Foot Khata (B)": null
 
-| Serial No. | Description of Documents |
-|------------|------------------------|
-| 1. | Record of Tenancy and Crops for the period 1987-88 to 2003-04, issued by the office of Tahsildar, Gadag taluk |
-| 2. | Mutation Register Extract bearing No. 120/2003-04, issued by the office of Tahsildar, Gadag taluk |
-| 3. | Record of Tenancy and Crops for the period 2004-05 to 2015-16, issued by the office of Tahsildar, Gadag taluk |
-| 4. | Gift Deed dated 10.03.2015 registered as document No. GDG-1-10167/2014-15 of book-1, stored in CD No. GDGD320, at the office of Sub-Registrar, Gadag |
-| 5. | Mutation Register Extract bearing No. H140/2014-15, issued by the office of Tahsildar, Gadag taluk |
-| 6. | Mutation Register Extract bearing No. H9/2016-17, issued by the office of Tahsildar, Gadag taluk |
-| 7. | Record of Tenancy and Crops for the period 2016-17, issued by the office of Tahsildar, Gadag taluk |
-| 8. | Mortgage Deed dated 07.12.2017 registered on 06.01.2018 as document No. GDG-1 Part-V-00110/2017-18, stored in CD No. GDGD371, at the office of Sub-Registrar, Gadag |
-| 9. | Mutation Register Extract bearing No. T272/2017-18, issued by the office of Tahsildar, Gadag taluk |
-| 10. | 11 E Sketch bearing No. 08031016922504001, issued by the office of Tahsildar, Gadag taluk |
-| 11. | Partition Deed dated 19.01.2018, registered as document No. GDG-1-09812/2017-18 of book-1, stored in CD No. GDGD371, at the office of Sub-Registrar, Gadag |
-| 12. | Mutation Register Extract bearing No. H92/2017-18, issued by the office of Tahsildar, Gadag taluk |
-| 13. | Record of Tenancy and Crops for the period 2017-18 to 2024-25, issued by the office of Tahsildar, Gadag taluk |
-| 14. | Mutation Register Extract bearing No. T140/2024-25, issued by the office of Tahsildar, Gadag taluk |
-| 15. | Latest Record of Tenancy and Crops for the period 2024-25, issued by the office of Tahsildar, Gadag taluk |
-| 16. | Karnataka Revision Settlement Akarband, issued by the office of Department of Survey & Land Records |
-| 17. | Tippani/PT Sheet issued by the office of the Department of Land Records |
-| 18. | Village Map of Harlapura village, issued by Director of Land Records |
-| 19. | Encumbrance Certificate for the period from 01.04.1985 to 31.03.2004, issued by the office of Sub-Registrar, Gadag |
-| 20. | Encumbrance Certificate for the period from 01.04.2004 to 12.08.2024, issued by the office of Sub-Registrar, Gadag |
-| 21. | Encumbrance Certificate for the period from 01.04.2024 to 01.01.2025, issued by the office of Sub-Registrar, Gadag |
-| 22. | Notarized Genealogical Tree dated 10.09.2024, 02.01.2025, declared by Mr. Chandrashekar s/o. Shivaji Halalli |
+                          "(A) Land Revenue": "Rs. Pai.\n23-2",
+                          "(B) Cess": null,
+                          "(C) Water Rate": null,
+                          "(D) Jodi": null,
+                          "Total": "23-2"
 
-III. DEVOLUTION OF TITLE
+                          "5. Soil Sample": "0500",
+                          "6. Patta": "Bangiyu Babba",
+                          "7. Number of Trees": {
+                          "Number": null,
+                          "Name": null
 
-| SL No. | SURVEY No. | EXTENT Acres | EXTENT Guntas/Cents | EXTENT OF KHARAB LAND A | EXTENT OF KHARAB LAND B | OWNER/S |
-|--------|------------|--------------|---------------------|--------------------------|--------------------------|---------|
-| 1. | 46/1 | 10 | 11 | 00 | 00 | Mr. Chandrashekar s/o. Shivaji Halalli |
+                          "8. Irrigated Area as per Khatawar": {
+                          "Total": null,
+                          "Source of Irrigation": null,
+                          "Bagayat": null,
+                          "Mungaru": null,
+                          "Hingaru": null
 
-IV. OBSERVATIONS
+                          "9. Name of Occupant or Owner, Account Number, Father's Name and Address": {
+                          "name 1": "Mangal\nArea - null, Account Number - null",
+                          "name 2": null,
+                          "name 3": null
 
-Based on the documents reviewed, the following observations are noted:
-1. The Record of Tenancy and Crops (RTC) from 1987-88 to 2024-25 consistently shows the land under Survey No. 46/1, measuring 10 acres 11 guntas, with no discrepancies in the extent of the land.
-2. The Mutation Register Extracts (120/2003-04, H140/2014-15, H9/2016-17, T272/2017-18, H92/2017-18, T140/2024-25) confirm the chain of title transfers and ownership changes, culminating in Mr. Chandrashekar s/o. Shivaji Halalli as the current owner.
-3. The Gift Deed dated 10.03.2015 and Partition Deed dated 19.01.2018, both registered at the Sub-Registrar’s office in Gadag, establish the legal transfer of the property to Mr. Chandrashekar.
-4. The Mortgage Deed dated 07.12.2017 indicates an encumbrance that was cleared as per the Encumbrance Certificates covering the period up to 01.01.2025.
-5. The Encumbrance Certificates (01.04.1985 to 01.01.2025) show no pending encumbrances or claims against the property as of the latest date.
-6. The Notarized Genealogical Tree dated 10.09.2024 and 02.01.2025 confirms the family members associated with the property, which is relevant for future transactions.
+                          "RTC Unique Number": null,
+                          "RTC Digitally Signed By": null,
+                          "Valid From": null,
+                          "Village Account Form No.": "Village Account Form No.",
+                          "Village": null,
+                          "Taluk": "Muvattokulu",
+                          "Page Serial Number": null,
+                          "Hobli": null
 
-V. LEGAL SCRUTINY
-
-The documents have been scrutinized for authenticity and legal validity:
-- All registered deeds (Gift Deed, Mortgage Deed, Partition Deed) are duly stamped and registered as per the Karnataka Stamp Act and Registration Act.
-- The RTCs and Mutation Extracts are issued by the competent authority (Tahsildar, Gadag taluk) and align with the revenue records.
-- The 11 E Sketch and Karnataka Revision Settlement Akarband confirm the physical boundaries and measurements of the land.
-- No legal disputes or claims are evident from the Encumbrance Certificates or other documents provided.
                                     `}
                                   </pre>
                                 </div>

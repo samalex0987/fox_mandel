@@ -60,6 +60,7 @@ const Simulation = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageGroup, setPageGroup] = useState(0);
    const [showPopup, setShowPopup] = useState(false);
+   const [showChat, setShowChat] = useState(false);
   const pagesPerGroup = 5;
 
   const [steps, setSteps] = useState([
@@ -788,12 +789,25 @@ Report On Title
             <div className="py-8">
               {report ? (
                 <div>
-                  <FloatingChatWidget />
+                  {
+                    showChat ?(
+
+                      <>
+                      <FloatingChatWidget />
+                      </>
+                    ):(
+                      <>
+                      </>
+                    )
+                  }
                   <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Your Report is Ready!</h3>
                   {showPopup && (
             <Popup
               message="Document was successfully sent to the mail"
-              onClose={() => setShowPopup(false)}
+              onClose={() => {
+                setShowPopup(false)
+                setShowChat(true)
+              }}
             />
           )}
                   

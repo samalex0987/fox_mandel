@@ -51,6 +51,8 @@ const App = () => {
     { title: 'Edit & Download', icon: Download, completed: false, description: 'Finalize and export your report' },
   ]);
 
+  const [show, UpdateShow] = useState(false)
+  
   const Sendmail = async () => {
     const formData = new FormData();
     formData.append("file", file);

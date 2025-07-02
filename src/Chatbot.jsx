@@ -45,10 +45,6 @@ const FloatingChatWidget = () => {
     else if (msg.includes('what is your name') || msg.includes('your name') || msg.includes('name')) {
       return "My name is FOXI. I am here to help answer your questions related to documents and contracts.";
     } 
-    // Check for Tamil language questions
-    else if (msg.includes('do you know tamil') || msg.includes('you know tamil') || msg.includes('tamil theriyuma')) {
-      return "Konjam theriyum! I know a little Tamil because I'm designed to help users in multiple languages.";
-    }
     // Check for document analysis requests
     else if (msg.includes('analyze document') || msg.includes('document analysis')) {
       return "I can help analyze documents for key information, dates, parties involved, and important clauses. What document would you like me to review?";

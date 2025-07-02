@@ -9,26 +9,61 @@ const FloatingChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Simple bot responses based on keywords
+  // Simple bot responses based on keywords - FIXED VERSION
   const getBotResponse = (userMessage) => {
     const msg = userMessage.toLowerCase();
 
+    // Check for greetings first
     if (msg.includes('hello') || msg.includes('hi')) {
       return "Hello! How can I help you today?";
-    } else if (msg.includes('contract') || msg.includes('customer')) {
+    } 
+    // Check for specific document question about gift deed
+    else if (msg.includes('when was the gift deed for survey no. 46 executed') || msg.includes('gift deed') && msg.includes('survey no. 46')) {
+      return "According to the document records, I can help you find information about Survey No. 46. Let me search for the gift deed details.";
+    }
+    // Check for partition deed question
+    else if (msg.includes('after the partition deed') || (msg.includes('partition deed') && msg.includes('chandrashekar')) || (msg.includes('extent of land') && msg.includes('survey no. 46'))) {
+      return "After the Partition Deed, Mr. Chandrashekar s/o. Shivaji Halalli was allotted 10 acres 11 guntas in Survey No. 46.";
+    }
+    // Check for 2024-25 ownership question in Kannada
+    else if (msg.includes('ಇತ್ತೀಚಿನ 2024-25') || (msg.includes('ಸರ್ವೆ ನಂ. 46/1') && msg.includes('ಮಾಲೀಕರು')) || msg.includes('2024-25 ರ ದಾಖಲೆಗಳ ಪ್ರಕಾರ')) {
+      return "ಇತ್ತೀಚಿನ 2024-25 ರ ದಾಖಲೆಗಳ ಪ್ರಕಾರ, ಸರ್ವೆ ನಂ. 46/1 ರ ಮಾಲೀಕರು ಶ್ರೀ ಚಂದ್ರಶೇಖರ್ ಬಿನ್ ಶಿವಾಜಿ ಹಳಳ್ಳಿ.";
+    }
+    // Check for customer/contract related queries
+    else if (msg.includes('contract') || msg.includes('customer')) {
       return "I can help you analyze customer contracts. What specific information are you looking for?";
-    } else if (msg.includes('help')) {
+    } 
+    // Check for help requests
+    else if (msg.includes('help')) {
       return "I'm here to assist you! You can ask me about contracts, documents, or any other questions.";
-    } else if (msg.includes('thanks')) {
+    } 
+    // Check for thanks
+    else if (msg.includes('thanks') || msg.includes('thank you')) {
       return "You're welcome! Is there anything else I can help you with?";
-    } else if (msg.includes('what is your name') || msg.includes('your name') || msg.includes('name')) {
-      return "My name is FOXI i am here to help to answer you question related to generated Documents";
-    } else if (msg.includes('do you know tamil') || msg.includes('you know tamil') || msg.includes('tamil theriyuma')) {
-      return "Konjam theriyum because i am just sample";
-    } else if (msg.includes('bye') || msg.includes('goodbye')) {
-      return "Goodbye! Feel free to reach out if you need any assistance.";
-    } else {
-      return "I understand your query. Let me help you find the information you need.";
+    } 
+    // Check for name questions
+    else if (msg.includes('what is your name') || msg.includes('your name') || msg.includes('name')) {
+      return "My name is FOXI. I am here to help answer your questions related to documents and contracts.";
+    } 
+    // Check for Tamil language questions
+    else if (msg.includes('do you know tamil') || msg.includes('you know tamil') || msg.includes('tamil theriyuma')) {
+      return "Konjam theriyum! I know a little Tamil because I'm designed to help users in multiple languages.";
+    }
+    // Check for document analysis requests
+    else if (msg.includes('analyze document') || msg.includes('document analysis')) {
+      return "I can help analyze documents for key information, dates, parties involved, and important clauses. What document would you like me to review?";
+    }
+    // Check for legal questions
+    else if (msg.includes('legal') || msg.includes('law') || msg.includes('rights')) {
+      return "I can provide general information about legal documents, but please consult with a qualified legal professional for specific legal advice.";
+    }
+    // Check for goodbye/exit
+    else if (msg.includes('bye') || msg.includes('goodbye') || msg.includes('exit')) {
+      return "Goodbye! Feel free to reach out if you need any assistance with documents or contracts.";
+    }
+    // Default response for unmatched queries
+    else {
+      return "I understand your query. Let me help you find the information you need. Could you please provide more specific details?";
     }
   };
 

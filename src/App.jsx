@@ -642,6 +642,7 @@ e-mail: prashantha.kumar@foxmandal.in
                             </div>
                           </div>
                           <div>
+                            
                             <DocumentEditor />
                           </div>
                         </div>
@@ -663,7 +664,7 @@ e-mail: prashantha.kumar@foxmandal.in
                         onClick={handleNextStep}
                         disabled={isProcessing}
                         className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
- aki                    >
+                     >
                         {isProcessing ? 'Processing...' : 'Approve & Continue'}
                       </button>
                     </div>

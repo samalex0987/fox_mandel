@@ -61,7 +61,6 @@ const Simulation = () => {
   const [pageGroup, setPageGroup] = useState(0);
    const [showPopup, setShowPopup] = useState(false);
    const [showChat, setShowChat] = useState(false);
-   const [Showpreview, Setpreview] = useState(true)
   const pagesPerGroup = 5;
 
   const [steps, setSteps] = useState([
@@ -71,18 +70,6 @@ const Simulation = () => {
     { title: 'Generate Report', icon: Sparkles, completed: false, description: 'Creating comprehensive insights' },
     { title: 'Edit & Download', icon: Download, completed: false, description: 'Finalize and export your report' },
   ]);
-
-
-  useEffect(() => {
-    if (currentStep === 3) {
-      const timer = setTimeout(() => {
-        Setpreview(false); // Show preview after 8 seconds
-        console.log(Showpreview)
-      }, 8000);
-
-      return () => clearTimeout(timer); // Cleanup timer on unmount
-    }
-  }, [currentStep]); 
 
   // Simulate automatic file upload for demo using local PDF
   useEffect(() => {
@@ -114,7 +101,7 @@ const Simulation = () => {
           await generateReport();
         }
         handleNextStep();
-      }, 30000);
+      }, 5000);
     } else if (currentStep === steps.length - 1) {
       // Show alert when reaching the final step
       // alert('Document was successfully send to the mail');
@@ -620,19 +607,15 @@ Report On Title
             <div>
               {!report ? (
                 <div className="text-center py-16">
-                  {
-                    Showpreview ? (
-                      <>
-                      <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-lg flex items-center justify-center">
                     <Sparkles className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Generating Report</h3>
                   <p className="text-gray-600 mb-8">Simulating report generation (Demo).</p>
-                  
-                      </>
-                    ):(
-                      <>
-                      <div className="mb-8">
+                </div>
+              ) : (
+                <div className="py-8">
+                  <div className="mb-8">
                     <h3 className="text-2xl font-semibold text-gray-800 mb-2">Generated Report & Document Preview</h3>
                     <p className="text-gray-600">Reviewing document pages and generated report (Demo)</p>
                      <div>
@@ -646,14 +629,6 @@ Report On Title
                                 </div>
                               </div>
                   </div>
-                      
-                      </>
-                    )
-                  }
-                </div>
-              ) : (
-                <div className="py-8">
-                 
                   {pdfPages.length == 0 ? (
                     <div className="space-y-6 mb-8">
                       <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">

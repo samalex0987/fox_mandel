@@ -405,7 +405,7 @@ Report On Title
                       {file && !pdfLoading ? <CheckCircle className="w-8 h-8 text-white" /> : <Upload className="w-8 h-8 text-white" />}
                     </div>
                     <p className="text-gray-600 text-sm">
-                      {file ? `Selected: Report - SY No. 46_1.pdf (${pdfPages.length} pages)` : 'Demo: Simulating PDF upload...'}
+                      {file ? `Selected: InputFile.pdf (${pdfPages.length} pages)` : 'Demo: Simulating PDF upload...'}
                     </p>
                     {pdfLoading && (
                       <div className="mt-4 w-64 mx-auto">

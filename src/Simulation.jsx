@@ -811,11 +811,12 @@ Report On Title
             />
           )}
                   
+
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <a
                       href={output}
                       
-                      download
+                      download="Report - SY No. 46_1.pdf"
                       className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                     >
                               <Download className="w-4 h-4" />

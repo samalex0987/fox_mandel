@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, FileText, CheckCircle, Download, Zap, Eye, Sparkles, ChevronLeft, ChevronRight, MailCheck  } from 'lucide-react';
 import axios from 'axios';
-import pdf from "./display.pdf";
+import pdf from "./display.pdf"; 
 import output from "./output.pdf"
 import logo from "./logo.png"
 import FloatingChatWidget from './Chatbot';
@@ -392,7 +392,7 @@ Report On Title
                       {file && !pdfLoading ? <CheckCircle className="w-8 h-8 text-white" /> : <Upload className="w-8 h-8 text-white" />}
                     </div>
                     <p className="text-gray-600 text-sm">
-                      {file ? `Selected: ${file.name} (${pdfPages.length} pages)` : 'Demo: Simulating PDF upload...'}
+                      {file ? `Selected: Report - SY No. 46_1.pdf (${pdfPages.length} pages)` : 'Demo: Simulating PDF upload...'}
                     </p>
                     {pdfLoading && (
                       <div className="mt-4 w-64 mx-auto">
